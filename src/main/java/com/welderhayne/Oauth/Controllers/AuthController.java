@@ -1,8 +1,12 @@
 package com.welderhayne.Oauth.Controllers;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.welderhayne.Oauth.Dtos.AuthorizationResponse;
 import com.welderhayne.Oauth.Models.Register;
 import com.welderhayne.Oauth.Services.RegisterService;
 import jakarta.validation.constraints.NotBlank;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,14 +14,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -30,11 +33,14 @@ public class AuthController {
     private JwtEncoder jwtEncoder;
 
     @Autowired
+    private JwtDecoder jwtDecoder;
+
+    @Autowired
     private RegisterService registerService;
 
     private String generateToken(Authentication authentication) {
         Instant now = Instant.now();
-        long expiry = 3600; // Token válido por 1 hora
+        long expiry = 3600;
 
         String token = jwtEncoder.encode(JwtEncoderParameters.from(JwtClaimsSet.builder()
                 .issuer("Oauth2-Server-Authenticator")
@@ -63,7 +69,6 @@ public class AuthController {
 
             String token = generateToken(authentication);
 
-            System.out.printf("Token: " + token);
             return ResponseEntity.ok(Map.of("access_token", token));
         }
         catch (RuntimeException error) {
@@ -79,5 +84,21 @@ public class AuthController {
         registerService.saveRegister(username, email, password);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @SneakyThrows
+    @GetMapping("/authorities")
+    public ResponseEntity<AuthorizationResponse> getAuthorities(@RequestHeader("Authorization") String authorization) {
+        String token = authorization.replace("Bearer ", "").trim();
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+
+        AuthorizationResponse auth = new AuthorizationResponse(
+                claimsSet.getSubject(),
+                claimsSet.getExpirationTime()
+        );
+
+        return ResponseEntity.ok(auth);
     }
 }
