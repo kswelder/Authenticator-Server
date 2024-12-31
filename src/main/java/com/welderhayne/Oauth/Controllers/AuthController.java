@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -20,8 +21,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/oauth2")
@@ -56,20 +56,25 @@ public class AuthController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<Map<String, String>> login(
-            @NotBlank @RequestParam("emailOrUsername") String emailOrUsername,
+    public ResponseEntity<String> login(
+            @NotBlank @RequestParam("usernameOrEmail") String usernameOrEmail,
             @NotBlank @RequestParam("password") String password) {
 
         try {
-            Register register = registerService.getRegister(emailOrUsername);
+            Register register = registerService.getRegister(usernameOrEmail);
+
+            GrantedAuthority authority = new SimpleGrantedAuthority(register.getPermition().name());
 
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(register.getUsername(), register.getSalt() + password)
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            register.getUsername(),
+                            register.getSalt() + password,
+                            List.of(authority)
+                    ));
 
             String token = generateToken(authentication);
 
-            return ResponseEntity.ok(Map.of("access_token", token));
+            return ResponseEntity.ok(token);
         }
         catch (RuntimeException error) {
             return ResponseEntity.badRequest().build();
