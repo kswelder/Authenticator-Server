@@ -1,4 +1,4 @@
-package com.welderhayne.Oauth.utils;
+package com.welderhayne.Oauth.Utils;
 
 import com.welderhayne.Oauth.Models.Register;
 import com.welderhayne.Oauth.Repositories.RegisterRepository;

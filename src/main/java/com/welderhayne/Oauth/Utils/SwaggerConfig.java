@@ -1,4 +1,4 @@
-package com.welderhayne.Oauth.utils;
+package com.welderhayne.Oauth.Utils;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
