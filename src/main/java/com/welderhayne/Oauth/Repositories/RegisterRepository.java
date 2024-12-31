@@ -14,6 +14,7 @@ public interface RegisterRepository extends JpaRepository<Register, Integer> {
     Optional<Register> findRegisterByUsername(String username);
     Optional<Register> findRegisterByEmail(String email);
     Optional<List<Register>> findAllRegisterByPermition(Permitions perm);
+    boolean deleteByIdKey(String idKey);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 }
