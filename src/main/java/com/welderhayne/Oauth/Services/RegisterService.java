@@ -3,6 +3,7 @@ package com.welderhayne.Oauth.Services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.welderhayne.Oauth.Dtos.RegisterDto;
 import com.welderhayne.Oauth.Enums.Permitions;
+import com.welderhayne.Oauth.Exceptions.DuplicateData;
 import com.welderhayne.Oauth.Models.Register;
 import com.welderhayne.Oauth.Repositories.RegisterRepository;
 import jakarta.persistence.EntityExistsException;
@@ -26,6 +27,9 @@ public class RegisterService {
     private ObjectMapper objectMapper;
 
     public void saveRegister(String username, String email, String password) {
+        if (registerRepository.existsByUsername(username)) throw new DuplicateData("Username alread exists");
+        if (registerRepository.existsByEmail(email)) throw new DuplicateData("Email alread exists");
+
         LocalDateTime localDateTime = LocalDateTime.now();
         Register newRegister = new Register();
 
@@ -44,46 +48,54 @@ public class RegisterService {
         registerRepository.save(newRegister);
     }
 
-    public RegisterDto findById(int id) {
-        Register register = registerRepository.findById(id)
+    public RegisterDto findById(String id) {
+        Register register = registerRepository.findRegisterByIdKey(id)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
-        return objectMapper.convertValue(register, RegisterDto.class);
+        RegisterDto dto = objectMapper.convertValue(register, RegisterDto.class);
+
+        dto.setId(register.getIdKey());
+
+        return dto;
     }
 
     public RegisterDto findByUsername(String username) {
         Register register = registerRepository.findRegisterByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
-        return objectMapper.convertValue(register, RegisterDto.class);
+        RegisterDto dto = objectMapper.convertValue(register, RegisterDto.class);
+
+        dto.setId(register.getIdKey());
+
+        return dto;
     }
 
     public RegisterDto findByEmail(String email) {
         Register register = registerRepository.findRegisterByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
-        return objectMapper.convertValue(register, RegisterDto.class);
+        RegisterDto dto = objectMapper.convertValue(register, RegisterDto.class);
+
+        dto.setId(register.getIdKey());
+
+        return dto;
     }
 
     public List<RegisterDto> getAllRegisters() {
         return registerRepository.findAll()
                 .stream()
-                .map(item -> objectMapper.convertValue(item, RegisterDto.class))
+                .map(item -> {
+                    RegisterDto dto = objectMapper.convertValue(item, RegisterDto.class);
+                    dto.setId(item.getIdKey());
+                    return dto;
+                })
                 .toList();
     }
 
-    public void deleteRegister(int id) {
-        registerRepository.deleteById(id);
-    }
-
-    public String getSalt(String usernameOrEmail) {
-        Register register = usernameOrEmail.contains("@") ?
-                registerRepository.findRegisterByEmail(usernameOrEmail)
-                        .orElseThrow(() -> new RuntimeException("Client not found")) :
-                registerRepository.findRegisterByUsername(usernameOrEmail)
-                        .orElseThrow(() -> new RuntimeException("Client not found"));
-
-        return register.getSalt();
+    public void deleteRegister(String id) {
+        boolean deleted = registerRepository.deleteByIdKey(id);
+        if (!deleted) throw new RuntimeException("Can't deleted id: "+ id);
+        System.out.println(id + " deleted");
     }
 
     public Register getRegister(String usernameOrEmail) {
