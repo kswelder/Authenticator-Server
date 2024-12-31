@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterDto {
-    private Integer id;
+    private String id;
     private String username;
     private String email;
     private LocalDateTime createdAt;
