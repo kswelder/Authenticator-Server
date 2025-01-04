@@ -4,6 +4,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.welderhayne.Oauth.Dtos.AuthorizationResponse;
 import com.welderhayne.Oauth.Models.Register;
+import com.welderhayne.Oauth.Services.ClaimService;
 import com.welderhayne.Oauth.Services.RegisterService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.SneakyThrows;
@@ -37,6 +38,9 @@ public class AuthController {
 
     @Autowired
     private RegisterService registerService;
+
+    @Autowired
+    private ClaimService claimService;
 
     private String generateToken(Authentication authentication) {
         Instant now = Instant.now();
@@ -94,16 +98,6 @@ public class AuthController {
     @SneakyThrows
     @GetMapping("/authorities")
     public ResponseEntity<AuthorizationResponse> getAuthorities(@RequestHeader("Authorization") String authorization) {
-        String token = authorization.replace("Bearer ", "").trim();
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
-
-        AuthorizationResponse auth = new AuthorizationResponse(
-                claimsSet.getSubject(),
-                claimsSet.getExpirationTime()
-        );
-
-        return ResponseEntity.ok(auth);
+        return ResponseEntity.ok(claimService.getClaims(authorization));
     }
 }
