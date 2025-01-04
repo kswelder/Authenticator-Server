@@ -48,6 +48,40 @@ public class RegisterService {
         registerRepository.save(newRegister);
     }
 
+    public void updateUser(String id, String username, String email) {
+        Register register = registerRepository.findRegisterByIdKey(id)
+                .orElseThrow(() -> new RuntimeException("Register not found"));
+
+        if (registerRepository.existsByUsername(username)) throw new EntityExistsException("Username alread exists");
+        if (registerRepository.existsByEmail(email)) throw new EntityExistsException("Email alread exists");
+
+        register.setUsername(username);
+        register.setEmail(email);
+        register.setUpdatedAt(LocalDateTime.now());
+
+        registerRepository.save(register);
+    }
+
+    public void updatePasswordRegister(String id, String password) {
+        Register register = registerRepository.findRegisterByIdKey(id)
+                .orElseThrow(() -> new RuntimeException("Register not found"));
+
+        register.setSalt(BCrypt.gensalt());
+        register.setPassword(passwordEncoder.encode(register.getSalt() + password));
+        register.setUpdatedAt(LocalDateTime.now());
+
+        registerRepository.save(register);
+    }
+
+    public void updatePermition(String id, String perm) {
+        Register register = registerRepository.findRegisterByIdKey(id)
+                .orElseThrow(() -> new RuntimeException("Register not found"));
+
+        register.setPermition(Permitions.valueOf(perm));
+
+        registerRepository.save(register);
+    }
+
     public RegisterDto findById(String id) {
         Register register = registerRepository.findRegisterByIdKey(id)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
