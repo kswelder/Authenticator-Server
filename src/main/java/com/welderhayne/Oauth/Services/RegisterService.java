@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,8 +53,8 @@ public class RegisterService {
         Register register = registerRepository.findRegisterByIdKey(id)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
-        if (registerRepository.existsByUsername(username)) throw new EntityExistsException("Username alread exists");
-        if (registerRepository.existsByEmail(email)) throw new EntityExistsException("Email alread exists");
+        if (registerRepository.existsByUsername(username) && !(register.getUsername() != username)) throw new EntityExistsException("Username alread exists");
+        if (registerRepository.existsByEmail(email) && !(register.getEmail() != email)) throw new EntityExistsException("Email alread exists");
 
         register.setUsername(username);
         register.setEmail(email);
@@ -127,8 +128,11 @@ public class RegisterService {
     }
 
     public void deleteRegister(String id) {
-        boolean deleted = registerRepository.deleteByIdKey(id);
-        if (!deleted) throw new RuntimeException("Can't deleted id: "+ id);
+        Register register = registerRepository.findRegisterByIdKey(id)
+                .orElseThrow(() -> new RuntimeException("Register not found"));
+
+        registerRepository.delete(register);
+
         System.out.println(id + " deleted");
     }
 
