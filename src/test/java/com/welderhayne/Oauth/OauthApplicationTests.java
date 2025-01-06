@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -37,7 +38,9 @@ class OauthApplicationTests {
 						.param("username", "sheilinha")
 						.param("email", "sheila@email.com")
 						.param("password", "5544")
-		).andExpect(status().isNoContent());
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -47,7 +50,9 @@ class OauthApplicationTests {
 						post("/oauth2/token")
 								.param("usernameOrEmail", "kswelder")
 								.param("password", "5544")
-				).andExpect(status().isOk())
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
 				.andReturn();
 
 		String token = "Bearer "+result.getResponse().getContentAsString();
@@ -55,7 +60,9 @@ class OauthApplicationTests {
 		mock.perform(
 				get("/oauth2/authorities")
 						.header("Authorization", token)
-		).andExpect(status().isOk());
+		)
+				.andDo(print())
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -67,7 +74,9 @@ class OauthApplicationTests {
 				post("/oauth2/token")
 						.param("usernameOrEmail", "kswelder")
 						.param("password", "5544")
-		).andExpect(status().isOk())
+		)
+				.andDo(print())
+				.andExpect(status().isOk())
 				.andReturn();
 
 		String token = "Bearer "+result.getResponse().getContentAsString();
@@ -76,6 +85,7 @@ class OauthApplicationTests {
 				get("/admin/all")
 						.header("Authorization", token)
 		)
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andReturn();
 
@@ -89,17 +99,23 @@ class OauthApplicationTests {
 				"/admin/find/register/id/"+
 				list.get(random.nextInt(list.size()-1)).getId())
 				.header("Authorization", token)
-		).andExpect(status().isOk());
+		)
+				.andDo(print())
+				.andExpect(status().isOk());
 
 		mock.perform(
 				get("/admin/find/register/username/ElPepe")
 						.header("Authorization", token)
-		).andExpect(status().isOk());
+		)
+				.andDo(print())
+				.andExpect(status().isOk());
 
 		result = mock.perform(
 				get("/admin/find/register/email/oldpresidentofamerica@email.com")
 						.header("Authorization", token)
-		).andExpect(status().isOk())
+		)
+				.andDo(print())
+				.andExpect(status().isOk())
 				.andReturn();
 
 		RegisterDto register = objectMapper.readValue(result.getResponse().getContentAsString(), RegisterDto.class);
@@ -110,25 +126,128 @@ class OauthApplicationTests {
 						.param("username", "JoelBiden")
 						.param("email", register.getEmail())
 						.header("Authorization", token)
-		).andExpect(status().isNoContent());
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
 
 		mock.perform(
 				put("/admin/update/password")
 						.param("id", register.getId())
 						.param("password", "JoelBiden@2021.15")
 						.header("Authorization", token)
-		).andExpect(status().isNoContent());
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
 
 		mock.perform(
 				put("/admin/update/permition")
 						.param("id", register.getId())
 						.param("perm", "EDITOR")
 						.header("Authorization", token)
-		).andExpect(status().isNoContent());
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
 
 		mock.perform(
 				delete("/admin/delete/" + register.getId())
 						.header("Authorization", token)
-		).andExpect(status().isNoContent());
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@SneakyThrows
+	public void testRegisterController() {
+		mock.perform(
+				post("/oauth2/register")
+						.param("username", "BrazilianBoy")
+						.param("email", "RonaldinhoSocker2007@email.com")
+						.param("password", "MySockerIsVeryGood@.360")
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
+
+		MvcResult result = mock.perform(
+				post("/oauth2/token")
+						.param("usernameOrEmail", "BrazilianBoy")
+						.param("password", "MySockerIsVeryGood@.360")
+		)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String token = "Bearer " + result.getResponse().getContentAsString();
+
+		result = mock.perform(
+				get("/user/register")
+						.header("Authorization", token)
+		)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+
+		RegisterDto dto = objectMapper.readValue(
+				result.getResponse().getContentAsString(),
+				RegisterDto.class
+		);
+
+		mock.perform(
+				put("/user/update/register")
+						.header("Authorization", token)
+						.param("username", dto.getUsername())
+						.param("email", "MrSadBoySing@email.com")
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent())
+				.andDo(print());
+
+		mock.perform(
+				put("/user/update/password")
+						.header("Authorization", token)
+						.param("password", "HbDkhaQi")
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
+
+		mock.perform(
+				delete("/user/delete")
+						.header("Authorization", token)
+		)
+				.andDo(print())
+				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@SneakyThrows
+	public void throwableRequests() {
+		mock.perform(
+						post("/oauth2/token")
+								.param("usernameOrEmail", "kswelder")
+								.param("password", "5544;>")
+				)
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		MvcResult result = mock.perform(
+				post("/oauth2/token")
+						.param("usernameOrEmail", "kswelder")
+						.param("password", "5544")
+		)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String token = "Bearer " + result.getResponse().getContentAsString();
+
+		mock.perform(
+				put("/user/update/register")
+						.header("Authorization", token)
+						.param("username", "awdsa;>")
+						.param("email", "inothaveemail@email.com")
+		)
+				.andDo(print())
+				.andExpect(status().isBadRequest());
 	}
 }
