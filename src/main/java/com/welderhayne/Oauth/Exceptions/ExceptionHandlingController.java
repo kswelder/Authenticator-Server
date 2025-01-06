@@ -30,4 +30,24 @@ public class ExceptionHandlingController {
         );
         return ResponseEntity.status(messager.getStatus()).body(messager);
     }
+
+    @ExceptionHandler(value = XssCharTokenInvalidException.class)
+    public ResponseEntity<ExceptionsMessager> exceptionXssCharTokenInvalid(XssCharTokenInvalidException error) {
+        ExceptionsMessager messager = new ExceptionsMessager(
+                HttpStatus.BAD_REQUEST,
+                error.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(messager.getStatus()).body(messager);
+    }
+
+    @ExceptionHandler(value = UnsupportedOperationException.class)
+    public ResponseEntity<ExceptionsMessager> exceptionUnsupportedOperation(UnsupportedOperationException error) {
+        ExceptionsMessager messager = new ExceptionsMessager(
+                HttpStatus.BAD_REQUEST,
+                error.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(messager.getStatus()).body(messager);
+    }
 }
