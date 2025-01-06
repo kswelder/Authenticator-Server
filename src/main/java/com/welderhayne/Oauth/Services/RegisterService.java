@@ -27,7 +27,14 @@ public class RegisterService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ClaimService claimService;
+
     public void saveRegister(String username, String email, String password) {
+        claimService.sanatizationString(username);
+        claimService.sanatizationString(email);
+        claimService.sanatizationString(password);
+
         if (registerRepository.existsByUsername(username)) throw new DuplicateData("Username alread exists");
         if (registerRepository.existsByEmail(email)) throw new DuplicateData("Email alread exists");
 
@@ -50,6 +57,9 @@ public class RegisterService {
     }
 
     public void updateUser(String id, String username, String email) {
+        claimService.sanatizationString(username);
+        claimService.sanatizationString(email);
+
         Register register = registerRepository.findRegisterByIdKey(id)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
@@ -64,6 +74,8 @@ public class RegisterService {
     }
 
     public void updatePasswordRegister(String id, String password) {
+        claimService.sanatizationString(password);
+
         Register register = registerRepository.findRegisterByIdKey(id)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
@@ -95,6 +107,8 @@ public class RegisterService {
     }
 
     public RegisterDto findByUsername(String username) {
+        claimService.sanatizationString(username);
+
         Register register = registerRepository.findRegisterByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
@@ -106,6 +120,8 @@ public class RegisterService {
     }
 
     public RegisterDto findByEmail(String email) {
+        claimService.sanatizationString(email);
+
         Register register = registerRepository.findRegisterByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Register not found"));
 
@@ -137,6 +153,8 @@ public class RegisterService {
     }
 
     public Register getRegister(String usernameOrEmail) {
+        claimService.sanatizationString(usernameOrEmail);
+
         return usernameOrEmail.contains("@") ?
                 registerRepository.findRegisterByEmail(usernameOrEmail)
                         .orElseThrow(() -> new EntityExistsException("Register not found")):
