@@ -15,7 +15,6 @@ A simple application for user registration and authentication to be consumed by 
 - **API Documentation**: Integrated Swagger UI
 - **Docker Support**: Scripts for Linux and Windows to build and run Docker containers
 - **Planned Features**:
-    - Write scripts for Linux and Windows to build and run Docker containers
 
 ---
 
@@ -81,24 +80,44 @@ A simple application for user registration and authentication to be consumed by 
     - `PUB_KEY`: Path to the public key
     - `PRIV_KEY`: Path to the private key
 
-### Steps
+### Steps to run
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/kswelder/Authenticator-Server
+    cd Authenticator-Server
+    ```
+
+2. Run Maven:
+    ```bash
+    mvn spring-boot:run
+    ```
+
+3. Access the application:
+    - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+### Steps to run with Docker
 1. Clone the repository:
    ```bash
-   git clone https://github.com/kswelder/Oauth-authenticator
-   cd Oauth-authenticator
+   git clone https://github.com/kswelder/Authenticator-Server
+   cd Authenticator-Server
    ```
 
 2. Build and run the Docker container using the provided scripts:
     - **Linux**:
       ```bash
-      ./environments/docker-setup.sh
+      ./environments/build_anddockerize.sh
       ```
     - **Windows**:
       ```cmd
-      environments\docker-setup.bat
+      environments\build_anddockerize.bat
       ```
 
-3. Access the application:
+3. Up Docker container:
+    ```bash
+    docker run -p 8080:8080 authentication-server-api:latest -d
+     ```
+
+4. Access the application:
     - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ---
