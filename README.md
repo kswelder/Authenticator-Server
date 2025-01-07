@@ -79,6 +79,7 @@ A simple application for user registration and authentication to be consumed by 
     - `PASS_DB`: Database password
     - `PUB_KEY`: Path to the public key
     - `PRIV_KEY`: Path to the private key
+    - `SPRING_PROFILES_ACTIVE`: Path to change environment dev or prod
 
 ### Steps to run
 1. Clone the repository:
