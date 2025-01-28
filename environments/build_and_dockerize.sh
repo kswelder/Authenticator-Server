@@ -14,13 +14,9 @@ DOCKER_TAG="latest"                             # Replace with your image tag
 echo "Navigating to project directory: $BASE_DIR"
 cd $BASE_DIR
 
-# Build the Spring Boot project using Maven
-echo "Building the Spring Boot application..."
-call mvn clean package
-
 # Build the Docker image
 echo "Building the Docker image: $DOCKER_IMAGE_NAME:$DOCKER_TAG"
-call docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG -f ./environments/Dockerfile .
+docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG -f ./environments/Dockerfile .
 
 # Print success message
 echo "Docker image $DOCKER_IMAGE_NAME:$DOCKER_TAG created successfully!"
