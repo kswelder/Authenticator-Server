@@ -101,23 +101,27 @@ A simple application for user registration and authentication to be consumed by 
    git clone https://github.com/kswelder/Authenticator-Server
    cd Authenticator-Server
    ```
+2. Build project
+   ```bash
+   mvn clean install
+   ```
 
-2. Build and run the Docker container using the provided scripts:
+3. Make Docker image:
     - **Linux**:
       ```bash
-      ./environments/build_anddockerize.sh
+      ./environments/build_and_dockerize.sh
       ```
     - **Windows**:
       ```cmd
-      environments\build_anddockerize.bat
+      environments\build_and_dockerize.bat
       ```
 
-3. Up Docker container:
+4. Up Docker container:
     ```bash
     docker run -p 8080:8080 authentication-server-api:latest -d
      ```
 
-4. Access the application:
+5. Access the application:
     - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ---
